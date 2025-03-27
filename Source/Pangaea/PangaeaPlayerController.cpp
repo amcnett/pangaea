@@ -11,6 +11,7 @@
 #include "InputActionValue.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
+#include "PlayerAvatar.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -20,6 +21,10 @@ APangaeaPlayerController::APangaeaPlayerController()
 	DefaultMouseCursor = EMouseCursor::Default;
 	CachedDestination = FVector::ZeroVector;
 	FollowTime = 0.f;
+
+	static ConstructorHelpers::FObjectFinder<UInputAction>InputActionAsset(TEXT("/Game/TopDown/Input/Actions/IA_Attack"));
+	if (InputActionAsset.Succeeded())
+		AttackAction = InputActionAsset.Object;
 }
 
 void APangaeaPlayerController::BeginPlay()
@@ -53,6 +58,10 @@ void APangaeaPlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Triggered, this, &APangaeaPlayerController::OnTouchTriggered);
 		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Completed, this, &APangaeaPlayerController::OnTouchReleased);
 		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Canceled, this, &APangaeaPlayerController::OnTouchReleased);
+	
+		// Setup for attack event
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &APangaeaPlayerController::OnAttackPressed);
+	
 	}
 	else
 	{
@@ -122,4 +131,13 @@ void APangaeaPlayerController::OnTouchReleased()
 {
 	bIsTouch = false;
 	OnSetDestinationReleased();
+}
+
+void APangaeaPlayerController::OnAttackPressed()
+{
+	auto playerAvatar = Cast<APlayerAvatar>(GetPawn());
+	if (playerAvatar->CanAttack())
+	{
+		playerAvatar->Attack();
+	}
 }

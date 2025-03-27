@@ -58,7 +58,7 @@ public:
 	FORCEINLINE class UCameraComponent* GetCameraComponet() const { return _cameraComponent; }
 	FORCEINLINE class USpringArmComponent* GetSringArmComponet() const { return _springArmComponent; }
 
-protected:
+//protected:
 	void DieProcess();				//process when the character is killed
 
 private:
