@@ -3,7 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Weapon.h"
 #include "GameFramework/Character.h"
+#include "Perception/AIPerceptionComponent.h"
+#include "Perception/AISenseConfig_Sight.h"
 #include "Enemy.generated.h"
 
 UCLASS()
@@ -38,6 +41,8 @@ protected:
 	float _AttackCountingDown;
 	APawn* _chasedTarget = nullptr;
 
+	UClass* _WeaponClass;
+	AWeapon* _Weapon;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -59,6 +64,12 @@ public:
 	void DieProcess();				//process when the character is killed
 
 private:
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UPawnSensingComponent* PawnSensingComponent;*/
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UPawnSensingComponent* PawnSensingComponent;
+	UAIPerceptionComponent* AIPerceptionComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UAISenseConfig_Sight* sightConfig;
 };

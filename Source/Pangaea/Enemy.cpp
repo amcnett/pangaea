@@ -12,7 +12,24 @@ AEnemy::AEnemy()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensor"));
+	//PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensor"));
+
+	static ConstructorHelpers::FObjectFinder<UBlueprint> blueprint_finder(TEXT("Blueprint'/Game/TopDown/Blueprints/BP_Hammer.BP_Hammer'"));
+	_WeaponClass = (UClass*)blueprint_finder.Object->GeneratedClass;
+
+	// Assign the custom controller class
+	AIControllerClass = AEnemyController::StaticClass();
+
+	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerception Component"));
+	sightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight Config"));
+	sightConfig->SightRadius = 1000.0f; //max distance for sight
+	sightConfig->LoseSightRadius = 1100.0f; //when it loses sight of seen target
+	sightConfig->PeripheralVisionAngleDegrees = 90.0f;
+	sightConfig->DetectionByAffiliation.bDetectEnemies = true;
+	sightConfig->DetectionByAffiliation.bDetectFriendlies = true;
+	sightConfig->DetectionByAffiliation.bDetectNeutrals = true;
+	AIPerceptionComponent->ConfigureSense(*sightConfig);
+	AIPerceptionComponent->SetDominantSense(sightConfig->GetSenseImplementation());
 
 }
 
@@ -21,6 +38,10 @@ void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	_HealthPoints = HealthPoints;
+
+	_Weapon = Cast<AWeapon>(GetWorld()->SpawnActor(_WeaponClass));
+	_Weapon->Holder = this;
+	_Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, FName("hand_rSocket"));
 	
 }
 
@@ -44,7 +65,7 @@ void AEnemy::Tick(float DeltaTime)
 	if (_chasedTarget != nullptr && animInst->State == EEnemyState::Locomotion)
 	{
 		auto enemyController = Cast<AEnemyController>(GetController());
-		enemyController->MakeAttackDecision(_chasedTarget);
+		//enemyController->MakeAttackDecision(_chasedTarget);
 	}
 
 }

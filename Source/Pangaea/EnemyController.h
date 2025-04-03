@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "Perception/AIPerceptionComponent.h"
 #include "EnemyController.generated.h"
 
 /**
@@ -16,6 +17,14 @@ class PANGAEA_API AEnemyController : public AAIController
 
 public:
 
-	void MakeAttackDecision(APawn* targetPawn);  //AI decision making. Called by PawnTick
+	//void MakeAttackDecision(APawn* targetPawn);  //AI decision making. Called by PawnTick
+	UFUNCTION()
+	void PerceptionUpdated(const TArray<AActor*>& UpdatedActors);
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UAIPerceptionComponent* AIPerceptionComponent;
+
+	virtual void BeginPlay() override;
 };
 	
