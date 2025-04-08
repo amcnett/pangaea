@@ -2,6 +2,10 @@
 
 
 #include "DefenseTower.h"
+#include "Projectile.h"
+#include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 ADefenseTower::ADefenseTower()
@@ -14,6 +18,9 @@ ADefenseTower::ADefenseTower()
 
 	_MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
 	_MeshComponent->SetupAttachment(_BoxComponent);
+
+	static ConstructorHelpers::FObjectFinder<UBlueprint> blueprint_finder(TEXT("Blueprint'/Game/TopDown/Blueprints/BP_Fireball.BP_Fireball'"));
+	_FireballClass = (UClass*)blueprint_finder.Object->GeneratedClass;
 
 }
 

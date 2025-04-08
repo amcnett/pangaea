@@ -28,7 +28,7 @@ void AWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (Owner == nullptr)
+	if (Holder == nullptr)
 	{
 		FQuat rotQuat = FQuat(FRotator(0.0f, 300.0f * DeltaTime, 0.0f));
 		AddActorLocalRotation(rotQuat);

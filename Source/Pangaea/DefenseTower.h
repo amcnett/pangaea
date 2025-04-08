@@ -33,6 +33,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UClass* _FireballClass;
+
 	int _HealthPoints;				//the tower's current health points
 	float _ReloadCountingDown;		//reload counting down
 
@@ -65,4 +67,21 @@ public:
 protected:
 	void DestroyProcess();			//process when the tower is destroyed
 
+	class APlayerAvatar* _Target = nullptr;
+
+	UFUNCTION()
+	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComponent,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnEndOverlap(UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComponent,
+		int32 OtherBodyIndex);
+
+	UFUNCTION(BlueprintCallable)
+	void OnMeshBeginOverlap(AActor* OtherActor);
 };
