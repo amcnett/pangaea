@@ -3,6 +3,9 @@
 
 #include "DefenseTower.h"
 #include "Projectile.h"
+#include "PlayerAvatar.h"
+#include "Weapon.h"
+#include "PangaeaCharacter.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -15,6 +18,9 @@ ADefenseTower::ADefenseTower()
 
 	_BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("Box Collision"));
 	SetRootComponent(_BoxComponent);
+	_BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &ADefenseTower::OnBeginOverlap);
+	_BoxComponent->OnComponentEndOverlap.AddDynamic(this, &ADefenseTower::OnEndOverlap);
+
 
 	_MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
 	_MeshComponent->SetupAttachment(_BoxComponent);
@@ -28,6 +34,7 @@ ADefenseTower::ADefenseTower()
 void ADefenseTower::BeginPlay()
 {
 	Super::BeginPlay();
+	SetActorTickInterval(0.5f);
 	
 }
 
@@ -35,6 +42,11 @@ void ADefenseTower::BeginPlay()
 void ADefenseTower::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (_Target != nullptr)
+	{
+		Fire();
+	}
 
 }
 
@@ -55,6 +67,15 @@ bool ADefenseTower::CanFire()
 
 void ADefenseTower::Fire()
 {
+
+	auto fireball = Cast<AProjectile>(GetWorld()->SpawnActor(_FireballClass));
+	FVector startLocation = GetActorLocation();
+	startLocation.Z += 100.0f;
+	FVector targetLocation = _Target->GetActorLocation();
+	targetLocation.Z = startLocation.Z;
+	FRotator rotation = UKismetMathLibrary::FindLookAtRotation(startLocation, targetLocation);
+	fireball->SetActorLocation(startLocation);
+	fireball->SetActorRotation(rotation);
 }
 
 
@@ -66,4 +87,52 @@ void ADefenseTower::DestroyProcess()
 {
 
 }
+
+void ADefenseTower::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComponent,
+	int32 OtherBodyIndex,
+	bool bFromSweep,
+	const FHitResult& SweepResult)
+{
+	APlayerAvatar* player = Cast<APlayerAvatar>(OtherActor);
+
+	if (player)
+	{
+
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Emerald, TEXT("Actor in range!!!!!"));
+		_Target = player;
+	}
+}
+
+
+void ADefenseTower::OnEndOverlap(UPrimitiveComponent* OverlappedComponent,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComponent,
+	int32 OtherBodyIndex)
+{
+	if (_Target != nullptr && OtherActor == _Target)
+	{
+		_Target = nullptr;
+	}
+}
+
+void ADefenseTower::OnMeshBeginOverlap(AActor* OtherActor)
+{
+	AWeapon* weapon = Cast<AWeapon>(OtherActor);
+	if (weapon == nullptr || weapon->Holder == nullptr)
+	{
+		return;
+	}
+
+	APangaeaCharacter* character = Cast<APangaeaCharacter> (weapon->Holder);
+	/*if (character->IsA(APlayerAvatar::StaticClass()) &&
+		character->IsAttacking() &&
+		weapon->IsWithinAttackRange(character->AttackRange, this) &&
+		CanBeDamaged())
+	{
+		Hit(weapon->Holder->Strength);
+	}*/
+}
+
 
