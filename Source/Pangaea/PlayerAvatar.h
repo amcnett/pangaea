@@ -30,6 +30,10 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "PlayerAvatar Params")
 	float AttackInterval = 1.2f;	//the character's attack invertal
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UUserWidget* HealthBarWidget;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
