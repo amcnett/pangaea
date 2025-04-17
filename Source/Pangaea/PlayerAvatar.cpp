@@ -4,6 +4,7 @@
 #include "PlayerAvatar.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "PlayerAvatarAnimInstance.h"
+#include "HealthBarWidget.h"
 
 // Sets default values
 APlayerAvatar::APlayerAvatar()
@@ -44,6 +45,8 @@ APlayerAvatar::APlayerAvatar()
 void APlayerAvatar::BeginPlay()
 {
 	Super::BeginPlay();
+
+	OnHealthPointsChanged();
 	
 }
 
@@ -110,5 +113,22 @@ void APlayerAvatar::DieProcess()
 	GEngine->ForceGarbageCollection(true);
 
 	//Destroy(); 	You can also use this line instead of the above three lines.
+}
+
+void APlayerAvatar::OnHealthPointsChanged() {
+	if (HealthBarWidget != nullptr) // does this UI component exist
+	{
+		float normalizedHealth = FMath::Clamp((float)_HealthPoints / HealthPoints, 0.0f, 1.0f);
+		auto healthBar = Cast<UHealthBarWidget>(HealthBarWidget);
+		healthBar->HealthProgressBar->SetPercent(normalizedHealth);
+	}
+}
+
+void APlayerAvatar::Attack_RPC_Implementation() { //lets clients know
+	Attack_Broadcast_RPC(); 
+}
+
+void APlayerAvatar::Attack_Broadcast_RPC_Implementation() { //let's the server know
+	Attack();
 }
 

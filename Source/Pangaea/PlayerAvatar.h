@@ -62,6 +62,12 @@ public:
 	FORCEINLINE class UCameraComponent* GetCameraComponet() const { return _cameraComponent; }
 	FORCEINLINE class USpringArmComponent* GetSringArmComponet() const { return _springArmComponent; }
 
+	UFUNCTION(Server, Reliable)
+	void Attack_RPC();
+
+	UFUNCTION(NetMultiCast, Reliable)
+	void Attack_Broadcast_RPC();
+
 //protected:
 	void DieProcess();				//process when the character is killed
 
@@ -71,4 +77,8 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* _cameraComponent;
+
+protected:
+	UFUNCTION()
+	void OnHealthPointsChanged();
 };

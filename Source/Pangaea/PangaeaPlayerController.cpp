@@ -138,6 +138,7 @@ void APangaeaPlayerController::OnAttackPressed()
 	auto playerAvatar = Cast<APlayerAvatar>(GetPawn());
 	if (playerAvatar->CanAttack())
 	{
-		playerAvatar->Attack();
+		StopMovement();
+		playerAvatar->Attack_RPC(); //lets the server know we are attacking
 	}
 }
