@@ -5,12 +5,16 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "PlayerAvatarAnimInstance.h"
 #include "HealthBarWidget.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 APlayerAvatar::APlayerAvatar()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	//turn on replication
+	bReplicates = true;
 
 	// Don't rotate character to camera direction
 	bUseControllerRotationPitch = false;
@@ -41,10 +45,16 @@ APlayerAvatar::APlayerAvatar()
 
 }
 
+void APlayerAvatar::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(APlayerAvatar, _HealthPoints);
+}
+
 // Called when the game starts or when spawned
 void APlayerAvatar::BeginPlay()
 {
 	Super::BeginPlay();
+	_HealthPoints = HealthPoints;
 
 	OnHealthPointsChanged();
 	
@@ -103,7 +113,21 @@ void APlayerAvatar::Attack()
 
 void APlayerAvatar::Hit(int damage)
 {
+	if (IsKilled())
+	{
+		return;
+	}
 
+	_HealthPoints -= damage;
+	OnHealthPointsChanged();
+
+	auto animInst = Cast<UPlayerAvatarAnimInstance>(GetMesh()->GetAnimInstance());
+	animInst->State = EPlayerState::Hit;
+
+	if (IsKilled())
+	{
+		PrimaryActorTick.bCanEverTick = false;
+	}
 }
 
 void APlayerAvatar::DieProcess()
@@ -121,6 +145,15 @@ void APlayerAvatar::OnHealthPointsChanged() {
 		float normalizedHealth = FMath::Clamp((float)_HealthPoints / HealthPoints, 0.0f, 1.0f);
 		auto healthBar = Cast<UHealthBarWidget>(HealthBarWidget);
 		healthBar->HealthProgressBar->SetPercent(normalizedHealth);
+	}
+
+	auto animInst = Cast<UPlayerAvatarAnimInstance>(GetMesh()->GetAnimInstance());
+	if(animInst != nullptr)
+		animInst->State = EPlayerState::Hit;
+
+	if (IsKilled())
+	{
+		PrimaryActorTick.bCanEverTick = false;
 	}
 }
 

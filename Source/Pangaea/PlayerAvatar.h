@@ -16,6 +16,9 @@ class PANGAEA_API APlayerAvatar : public ACharacter
 public:
 	// Sets default values for this character's properties
 	APlayerAvatar();
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	UPROPERTY(EditAnywhere, Category = "PlayerAvatar Params")
 	int HealthPoints = 500;			//the character's max health points
 
@@ -38,6 +41,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(Replicatedusing = OnHealthPointsChanged)
 	int _HealthPoints;
 	float _AttackCountingDown;
 public:
